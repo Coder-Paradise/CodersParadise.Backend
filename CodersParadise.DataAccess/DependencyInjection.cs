@@ -1,4 +1,6 @@
-﻿using CodersParadise.DataAccess.Databases.CodersParadise;
+﻿using CodersParadise.Core.Interfaces.Repositories;
+using CodersParadise.DataAccess.Databases.CodersParadise;
+using CodersParadise.DataAccess.Respositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +18,9 @@ namespace CodersParadise.DataAccess
         {
             //Add Database Dependencies
             services.AddDbContext<CodersParadiseDbContext>(opt => opt.UseSqlServer(config["ConnectionStrings:CodersParadiseConnection"]));
+
+            //Add DI Registrations
+            services.AddScoped<IAuthRepository, AuthRepository>();
 
             return services;
         }
