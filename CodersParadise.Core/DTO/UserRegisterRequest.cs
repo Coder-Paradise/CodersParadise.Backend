@@ -8,7 +8,7 @@
 
         public string ConfirmPassword { get; set; }
 
-        public byte[] PaswordHash { get; set; }
+        public byte[] PasswordHash { get; set; }
 
         public byte[] PasswordSalt { get; set; }
 

@@ -36,7 +36,7 @@ namespace CodersParadise.DataAccess.Respositories
             var user = new User
             {
                 Email = request.Email,
-                PaswordHash = request.PaswordHash,
+                PasswordHash = request.PasswordHash,
                 PasswordSalt = request.PasswordSalt,
                 VerificationToken = request.VerificationToken,
             };

@@ -31,7 +31,7 @@ namespace CodersParadise.Core.Logic
                 out byte[] passwordSalt);
 
             request.PasswordSalt = passwordSalt;
-            request.PaswordHash =  passwordHash;
+            request.PasswordHash =  passwordHash;
             request.VerificationToken = CreateRandomToken();
 
             var response = await _authService.Register(request);    
