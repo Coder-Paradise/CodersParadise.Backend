@@ -1,9 +1,4 @@
 ﻿using CodersParadise.Core.DTO;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CodersParadise.Core.Interfaces.Repositories
 {
@@ -12,5 +7,9 @@ namespace CodersParadise.Core.Interfaces.Repositories
         Task<bool> Register(UserRegisterRequest request);
 
         Task<Models.User?> GetUserByEmail(string email);
+
+        Task<Models.User?> GetUserByToken(string token);
+
+        Task<bool> UpdateUserVerifiedDate(DateTime dateTime);
     }
 }

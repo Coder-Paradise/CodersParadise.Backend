@@ -42,5 +42,56 @@ namespace CodersParadise.Api.Controllers
             }
    
         }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(ApiModels.UserLoginRequest request)
+        {
+            try
+            {
+                var userLoginRequest = new Core.DTO.UserLoginRequest()
+                {
+                    Email = request.Email,
+                    Password = request.Password
+                };
+
+                var result = await _authLogic.Login(userLoginRequest);
+
+                if (result)
+                    return Ok($"Welcome back, {request.Email}! :)");
+                else
+                    return BadRequest("There was an issue logging in!");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+
+        [HttpPost("verify")]
+        public async Task<IActionResult> Verify(string token)
+        {
+            try
+            {
+                var user = await _authLogic.Verify(token);
+                return Ok();
+                //var userLoginRequest = new Core.DTO.UserLoginRequest()
+                //{
+                //    Email = request.Email,
+                //    Password = request.Password
+                //};
+
+                //var result = await _authLogic.Login(userLoginRequest);
+
+                //if (result)
+                //    return Ok($"Welcome back, {request.Email}! :)");
+                //else
+                //    return BadRequest("There was an issue logging in!");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }

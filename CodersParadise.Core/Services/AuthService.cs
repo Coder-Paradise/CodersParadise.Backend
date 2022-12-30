@@ -1,11 +1,6 @@
 ﻿using CodersParadise.Core.DTO;
 using CodersParadise.Core.Interfaces.Repositories;
 using CodersParadise.Core.Interfaces.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CodersParadise.Core.Services
 {
@@ -27,6 +22,18 @@ namespace CodersParadise.Core.Services
         public async Task<Models.User?> GetUserByEmail(string email)
         {
             var response = await _authRepository.GetUserByEmail(email);
+            return response;
+        }
+
+        public async Task<Models.User?> GetUserByToken(string token)
+        {
+            var response = await _authRepository.GetUserByToken(token);
+            return response;
+        }
+
+        public async Task<bool> UpdateUserVerifiedDate(DateTime verifiedDate)
+        {
+            var response = await _authRepository.UpdateUserVerifiedDate(verifiedDate);
             return response;
         }
     }
