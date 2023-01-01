@@ -2,11 +2,7 @@
 using CodersParadise.Core.Interfaces.Repositories;
 using CodersParadise.DataAccess.Databases.CodersParadise;
 using CodersParadise.DataAccess.Databases.CodersParadise.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace CodersParadise.DataAccess.Respositories
 {
@@ -27,8 +23,37 @@ namespace CodersParadise.DataAccess.Respositories
 
             return new Core.Models.User
             {
-                Email = user.Email
+                Id = user.Id,
+                Email = user.Email,
+                VerifiedDate = user.VerifiedDate,
+                PasswordSalt = user.PasswordSalt,   
+                PasswordHash = user.PasswordHash
             };
+        }
+
+        public async Task<Core.Models.User?> GetUserByToken(string token)
+        {
+            var user = _dbContext.Users.Where(x => x.VerificationToken == token).FirstOrDefault();
+
+            if (user == null) return null;
+
+            return new Core.Models.User
+            {
+                Id = user.Id,
+                Email = user.Email,
+                VerifiedDate = user.VerifiedDate,
+                PasswordSalt = user.PasswordSalt,
+                PasswordHash = user.PasswordHash
+            };
+        }
+
+        public async Task UpdateUserVerifiedDate(int userId, DateTime verifiedDate)
+        {
+            await _dbContext.Users
+                .Where(u => u.Id == userId)
+                .ExecuteUpdateAsync(b =>
+                    b.SetProperty(u => u.VerifiedDate, verifiedDate)
+                );
         }
 
         public async Task<bool> Register(UserRegisterRequest request)

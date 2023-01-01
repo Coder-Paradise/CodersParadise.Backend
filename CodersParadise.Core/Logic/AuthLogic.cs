@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace CodersParadise.Core.Logic
 {
@@ -38,12 +37,50 @@ namespace CodersParadise.Core.Logic
             return response;
         }
 
+        public async Task<bool> Login(UserLoginRequest request)
+        {
+            var user = await _authService.GetUserByEmail(request.Email);
+
+            if (user == null)
+                throw new Exception("User not found");
+
+            if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
+            {
+                throw new Exception("Password is incorrect.");
+            }
+
+            if(user.VerifiedDate == null)
+                throw new Exception("Not Verified");
+
+            return true;
+        }
+
+        public async Task Verify(string token)
+        {
+            var user = await _authService.GetUserByToken(token);
+
+            if (user == null)
+                throw new Exception("User not found");
+
+            await _authService.UpdateUserVerifiedDate(user.Id, DateTime.UtcNow);
+        }
+
+
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             using(var hmac = new HMACSHA512())
             {
                 passwordSalt = hmac.Key;
                 passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+            }
+        }
+
+        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512(passwordSalt))
+            {
+               var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+                return computedHash.SequenceEqual(passwordHash);
             }
         }
 
