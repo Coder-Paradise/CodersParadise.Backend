@@ -81,5 +81,19 @@ namespace CodersParadise.Api.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(string email)
+        {
+            try
+            {
+                await _authLogic.ForgotPassword(email);
+                return Ok("You may now reset your password.");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }

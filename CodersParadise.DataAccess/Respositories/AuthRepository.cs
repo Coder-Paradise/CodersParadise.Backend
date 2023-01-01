@@ -56,6 +56,16 @@ namespace CodersParadise.DataAccess.Respositories
                 );
         }
 
+        public async Task UpdateUserResetToken(int userId, string resetToken, DateTime tokenExpiry)
+        {
+            await _dbContext.Users
+                .Where(u => u.Id == userId)
+                .ExecuteUpdateAsync(b =>
+                    b.SetProperty(u => u.TokenExpiry, tokenExpiry)
+                     .SetProperty(u => u.PasswordResetToken, resetToken)
+                );
+        }
+
         public async Task<bool> Register(UserRegisterRequest request)
         {
             var user = new User

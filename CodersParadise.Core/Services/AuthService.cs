@@ -35,5 +35,10 @@ namespace CodersParadise.Core.Services
         {
             await _authRepository.UpdateUserVerifiedDate(userId, verifiedDate);
         }
+
+        public async Task UpdateUserResetToken(int userId, string resetToken, DateTime tokenExpiry)
+        {
+            await _authRepository.UpdateUserResetToken(userId, resetToken, tokenExpiry);
+        }
     }
 }

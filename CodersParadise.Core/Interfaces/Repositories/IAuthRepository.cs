@@ -11,5 +11,7 @@ namespace CodersParadise.Core.Interfaces.Repositories
         Task<Models.User?> GetUserByToken(string token);
 
         Task UpdateUserVerifiedDate(int userId, DateTime dateTime);
+
+        Task UpdateUserResetToken(int userId, string resetToken, DateTime tokenExpiry);
     }
 }
