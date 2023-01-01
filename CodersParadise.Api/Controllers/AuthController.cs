@@ -73,20 +73,8 @@ namespace CodersParadise.Api.Controllers
         {
             try
             {
-                var user = await _authLogic.Verify(token);
+                await _authLogic.Verify(token);
                 return Ok();
-                //var userLoginRequest = new Core.DTO.UserLoginRequest()
-                //{
-                //    Email = request.Email,
-                //    Password = request.Password
-                //};
-
-                //var result = await _authLogic.Login(userLoginRequest);
-
-                //if (result)
-                //    return Ok($"Welcome back, {request.Email}! :)");
-                //else
-                //    return BadRequest("There was an issue logging in!");
             }
             catch (Exception e)
             {

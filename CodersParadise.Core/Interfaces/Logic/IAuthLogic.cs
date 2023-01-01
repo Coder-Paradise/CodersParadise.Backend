@@ -8,6 +8,6 @@ namespace CodersParadise.Core.Interfaces.Logic
 
         Task<bool> Login(UserLoginRequest request);
 
-        Task<bool> Verify(string token);
+        Task Verify(string token);
     }
 }

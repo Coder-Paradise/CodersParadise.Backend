@@ -2,6 +2,7 @@
 using CodersParadise.Core.Interfaces.Repositories;
 using CodersParadise.DataAccess.Databases.CodersParadise;
 using CodersParadise.DataAccess.Databases.CodersParadise.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CodersParadise.DataAccess.Respositories
 {
@@ -46,30 +47,13 @@ namespace CodersParadise.DataAccess.Respositories
             };
         }
 
-        public async Task<bool> UpdateUserVerifiedDate(DateTime verifiedDate)
+        public async Task UpdateUserVerifiedDate(int userId, DateTime verifiedDate)
         {
-            var user = new User() { Id = 2, VerifiedDate = verifiedDate };
-            //using (var db = new MyEfContextName())
-            //{
-            _dbContext.Users.Attach(user);
-            _dbContext.Entry(user).Property(x => x.VerifiedDate).IsModified = true;
-            _dbContext.SaveChanges();
-            //}
-
-            return true;
-
-            //var user = _dbContext.Users.Where(x => x.VerificationToken == token).FirstOrDefault();
-
-            //if (user == null) return null;
-
-            //return new Core.Models.User
-            //{
-            //    Id = user.Id,
-            //    Email = user.Email,
-            //    VerifiedDate = user.VerifiedDate,
-            //    PasswordSalt = user.PasswordSalt,
-            //    PasswordHash = user.PasswordHash
-            //};
+            await _dbContext.Users
+                .Where(u => u.Id == userId)
+                .ExecuteUpdateAsync(b =>
+                    b.SetProperty(u => u.VerifiedDate, verifiedDate)
+                );
         }
 
         public async Task<bool> Register(UserRegisterRequest request)

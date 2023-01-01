@@ -10,6 +10,6 @@ namespace CodersParadise.Core.Interfaces.Services
 
         Task<Models.User?> GetUserByToken(string token);
 
-        Task<bool> UpdateUserVerifiedDate(DateTime verifiedDate);
+        Task UpdateUserVerifiedDate(int userId, DateTime verifiedDate);
     }
 }

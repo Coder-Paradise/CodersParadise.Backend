@@ -55,16 +55,14 @@ namespace CodersParadise.Core.Logic
             return true;
         }
 
-        public async Task<bool> Verify(string token)
+        public async Task Verify(string token)
         {
             var user = await _authService.GetUserByToken(token);
 
-            var isVerified = await _authService.UpdateUserVerifiedDate(DateTime.UtcNow);
+            if (user == null)
+                throw new Exception("User not found");
 
-            if (user.VerifiedDate == null)
-                throw new Exception("Not Verified");
-
-            return true;
+            await _authService.UpdateUserVerifiedDate(user.Id, DateTime.UtcNow);
         }
 
 

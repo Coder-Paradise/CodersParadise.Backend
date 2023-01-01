@@ -31,10 +31,9 @@ namespace CodersParadise.Core.Services
             return response;
         }
 
-        public async Task<bool> UpdateUserVerifiedDate(DateTime verifiedDate)
+        public async Task UpdateUserVerifiedDate(int userId, DateTime verifiedDate)
         {
-            var response = await _authRepository.UpdateUserVerifiedDate(verifiedDate);
-            return response;
+            await _authRepository.UpdateUserVerifiedDate(userId, verifiedDate);
         }
     }
 }
