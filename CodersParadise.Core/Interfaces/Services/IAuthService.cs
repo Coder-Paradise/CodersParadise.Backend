@@ -10,6 +10,12 @@ namespace CodersParadise.Core.Interfaces.Services
 
         Task<Models.User?> GetUserByToken(string token);
 
+        Task<Models.User?> GetUserByResetToken(string resetToken);
+
         Task UpdateUserVerifiedDate(int userId, DateTime verifiedDate);
+
+        Task UpdateUserResetToken(int userId, string resetToken, DateTime tokenExpiry);
+
+        Task UpdateUserPassword(Models.User user);
     }
 }

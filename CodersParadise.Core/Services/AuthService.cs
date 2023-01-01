@@ -31,9 +31,25 @@ namespace CodersParadise.Core.Services
             return response;
         }
 
+        public async Task<Models.User?> GetUserByResetToken(string resetToken)
+        {
+            var response = await _authRepository.GetUserByResetToken(resetToken);
+            return response;
+        }
+
         public async Task UpdateUserVerifiedDate(int userId, DateTime verifiedDate)
         {
             await _authRepository.UpdateUserVerifiedDate(userId, verifiedDate);
+        }
+
+        public async Task UpdateUserResetToken(int userId, string resetToken, DateTime tokenExpiry)
+        {
+            await _authRepository.UpdateUserResetToken(userId, resetToken, tokenExpiry);
+        }
+
+        public async Task UpdateUserPassword(Models.User user)
+        {
+            await _authRepository.UpdateUserPassword(user);
         }
     }
 }

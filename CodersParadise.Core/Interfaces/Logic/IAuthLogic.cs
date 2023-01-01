@@ -9,5 +9,9 @@ namespace CodersParadise.Core.Interfaces.Logic
         Task<bool> Login(UserLoginRequest request);
 
         Task Verify(string token);
+
+        Task ForgotPassword(string email);
+
+        Task ResetPassword(ResetPasswordRequestDTO request);
     }
 }

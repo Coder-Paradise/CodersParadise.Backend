@@ -65,6 +65,31 @@ namespace CodersParadise.Core.Logic
             await _authService.UpdateUserVerifiedDate(user.Id, DateTime.UtcNow);
         }
 
+        public async Task ForgotPassword(string email)
+        {
+            var user = await _authService.GetUserByEmail(email);
+
+            if (user == null)
+                throw new Exception("User not found");
+
+            await _authService.UpdateUserResetToken(user.Id, CreateRandomToken(), DateTime.UtcNow.AddDays(1));
+        }
+
+        public async Task ResetPassword(ResetPasswordRequestDTO request)
+        {
+            var user = await _authService.GetUserByResetToken(request.Token);
+
+            if (user == null || user.TokenExpiry < DateTime.UtcNow)
+                throw new Exception("Invalid Token.");
+
+            CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
+            user.PasswordResetToken = null;
+            user.TokenExpiry = null;
+
+            await _authService.UpdateUserPassword(user);
+        }
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
