@@ -17,7 +17,7 @@ namespace CodersParadise.DataAccess.Respositories
 
         public async Task<Core.Models.User?> GetUserByEmail(string email)
         {
-            var user = _dbContext.Users.Where(x => x.Email == email).FirstOrDefault();
+            var user = await _dbContext.Users.Where(x => x.Email == email).FirstOrDefaultAsync();
 
             if (user == null) return null;
 
@@ -33,7 +33,23 @@ namespace CodersParadise.DataAccess.Respositories
 
         public async Task<Core.Models.User?> GetUserByToken(string token)
         {
-            var user = _dbContext.Users.Where(x => x.VerificationToken == token).FirstOrDefault();
+            var user = await _dbContext.Users.Where(x => x.VerificationToken == token).FirstOrDefaultAsync();
+
+            if (user == null) return null;
+
+            return new Core.Models.User
+            {
+                Id = user.Id,
+                Email = user.Email,
+                VerifiedDate = user.VerifiedDate,
+                PasswordSalt = user.PasswordSalt,
+                PasswordHash = user.PasswordHash
+            };
+        }
+
+        public async Task<Core.Models.User?> GetUserByResetToken(string token)
+        {
+            var user = await _dbContext.Users.Where(x => x.PasswordResetToken == token).FirstOrDefaultAsync();
 
             if (user == null) return null;
 
@@ -63,6 +79,18 @@ namespace CodersParadise.DataAccess.Respositories
                 .ExecuteUpdateAsync(b =>
                     b.SetProperty(u => u.TokenExpiry, tokenExpiry)
                      .SetProperty(u => u.PasswordResetToken, resetToken)
+                );
+        }
+
+        public async Task UpdateUserPassword(Core.Models.User user)
+        {
+            await _dbContext.Users
+                .Where(u => u.Id == user.Id)
+                .ExecuteUpdateAsync(b =>
+                    b.SetProperty(u => u.PasswordHash, user.PasswordHash)
+                     .SetProperty(u => u.PasswordSalt, user.PasswordSalt)
+                     .SetProperty(u => u.PasswordResetToken, user.PasswordResetToken)
+                     .SetProperty(u => u.TokenExpiry, user.TokenExpiry)
                 );
         }
 

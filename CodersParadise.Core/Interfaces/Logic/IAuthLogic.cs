@@ -11,5 +11,7 @@ namespace CodersParadise.Core.Interfaces.Logic
         Task Verify(string token);
 
         Task ForgotPassword(string email);
+
+        Task ResetPassword(ResetPasswordRequestDTO request);
     }
 }

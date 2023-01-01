@@ -1,6 +1,5 @@
 ﻿using CodersParadise.Api.ApiModels;
 using CodersParadise.Core.Interfaces.Logic;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using CodersParadise.Core.DTO;
 
@@ -89,6 +88,27 @@ namespace CodersParadise.Api.Controllers
             {
                 await _authLogic.ForgotPassword(email);
                 return Ok("You may now reset your password.");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
+        {
+            try
+            {
+                var resetPasswordRequest = new ResetPasswordRequestDTO()
+                {
+                    Token = request.Token,
+                    Password = request.Password,
+                    ConfirmPassword = request.ConfirmPassword
+                };
+
+                await _authLogic.ResetPassword(resetPasswordRequest);
+                return Ok("Password successfully reset.");
             }
             catch (Exception e)
             {
