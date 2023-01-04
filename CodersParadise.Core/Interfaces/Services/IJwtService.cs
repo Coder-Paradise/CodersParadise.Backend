@@ -1,0 +1,14 @@
+﻿using CodersParadise.Core.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CodersParadise.Core.Interfaces.Services
+{
+    public interface IJwtService
+    {
+        JwtAccessToken GenerateAccessToken(long userId, string userName);
+    }
+}

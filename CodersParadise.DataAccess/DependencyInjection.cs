@@ -1,5 +1,7 @@
 ﻿using CodersParadise.Core.Interfaces.Repositories;
+using CodersParadise.Core.Interfaces.Services;
 using CodersParadise.DataAccess.Databases.CodersParadise;
+using CodersParadise.DataAccess.JwtService;
 using CodersParadise.DataAccess.Respositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -21,6 +23,7 @@ namespace CodersParadise.DataAccess
 
             //Add DI Registrations
             services.AddScoped<IAuthRepository, AuthRepository>();
+            services.AddScoped<IAccessTokenGenerator, AccessTokenGenerator>();
 
             return services;
         }

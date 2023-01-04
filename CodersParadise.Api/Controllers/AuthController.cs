@@ -55,10 +55,7 @@ namespace CodersParadise.Api.Controllers
 
                 var result = await _authLogic.Login(userLoginRequest);
 
-                if (result)
-                    return Ok($"Welcome back, {request.Email}! :)");
-                else
-                    return BadRequest("There was an issue logging in!");
+                return Ok(new LoginResponse() { AccessToken = result.AccessToken, TokenExpiry = result.TokenExpiry });
             }
             catch (Exception e)
             {
