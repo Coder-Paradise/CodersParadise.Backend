@@ -13,6 +13,7 @@ namespace CodersParadise.Core
         {
             //Add DI Registrations
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IAuthLogic, AuthLogic>();
 
             return services;

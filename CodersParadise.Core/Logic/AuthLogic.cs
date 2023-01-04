@@ -1,6 +1,7 @@
 ﻿using CodersParadise.Core.DTO;
 using CodersParadise.Core.Interfaces.Logic;
 using CodersParadise.Core.Interfaces.Services;
+using CodersParadise.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,10 +13,12 @@ namespace CodersParadise.Core.Logic
     public class AuthLogic : IAuthLogic
     {
         private readonly IAuthService _authService;
+        private readonly IJwtService _jwtService;
 
-        public AuthLogic(IAuthService authService)
+        public AuthLogic(IAuthService authService, IJwtService jwtService)
         {
             _authService = authService;
+            _jwtService = jwtService;
         }
 
         public async Task<bool> Register(UserRegisterRequest request)
@@ -37,7 +40,7 @@ namespace CodersParadise.Core.Logic
             return response;
         }
 
-        public async Task<bool> Login(UserLoginRequest request)
+        public async Task<JwtAccessToken> Login(UserLoginRequest request)
         {
             var user = await _authService.GetUserByEmail(request.Email);
 
@@ -52,7 +55,7 @@ namespace CodersParadise.Core.Logic
             if(user.VerifiedDate == null)
                 throw new Exception("Not Verified");
 
-            return true;
+            return _jwtService.GenerateAccessToken(user.Id, request.Email);
         }
 
         public async Task Verify(string token)

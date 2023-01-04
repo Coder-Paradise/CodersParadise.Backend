@@ -1,6 +1,8 @@
 using CodersParadise.Api;
+using CodersParadise.Api.Extensions;
 using CodersParadise.Core;
 using CodersParadise.DataAccess;
+using CodersParadise.DataAccess.JwtService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,12 @@ builder.Services.AddSwaggerGen();
 
 //Add services to the container
 builder.Services.AddDataAccessServices(builder.Configuration);
+
+// JWT Configurations
+JwtConfiguration jwtConfiguration = new JwtConfiguration();
+builder.Configuration.Bind("JwtConfig", jwtConfiguration);
+builder.Services.AddSingleton(jwtConfiguration);
+builder.Services.AddTokenAuthentication(jwtConfiguration);
 
 var app = builder.Build();
 

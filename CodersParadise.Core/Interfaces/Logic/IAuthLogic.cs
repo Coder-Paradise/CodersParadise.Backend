@@ -1,4 +1,5 @@
 ﻿using CodersParadise.Core.DTO;
+using CodersParadise.Core.Models;
 
 namespace CodersParadise.Core.Interfaces.Logic
 {
@@ -6,7 +7,7 @@ namespace CodersParadise.Core.Interfaces.Logic
     {
         Task<bool> Register(UserRegisterRequest request);
 
-        Task<bool> Login(UserLoginRequest request);
+        Task<JwtAccessToken> Login(UserLoginRequest request);
 
         Task Verify(string token);
 
