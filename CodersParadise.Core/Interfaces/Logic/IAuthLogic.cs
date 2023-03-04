@@ -7,7 +7,7 @@ namespace CodersParadise.Core.Interfaces.Logic
     {
         Task<bool> Register(UserRegisterRequest request);
 
-        Task<JwtAccessToken> Login(UserLoginRequest request);
+        Task<UserLoginResponse> Login(UserLoginRequest request);
 
         Task Verify(string token);
 

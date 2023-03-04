@@ -24,6 +24,8 @@ namespace CodersParadise.DataAccess
             //Add DI Registrations
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IAccessTokenGenerator, AccessTokenGenerator>();
+            services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
+            services.AddScoped<ITokenValidator, TokenValidator>();
 
             return services;
         }

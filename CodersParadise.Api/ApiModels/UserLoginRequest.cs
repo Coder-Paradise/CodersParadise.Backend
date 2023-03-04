@@ -4,7 +4,8 @@ namespace CodersParadise.Api.ApiModels
 {
     public class UserLoginRequest
     {
-        [Required, EmailAddress]
+    //    [Required, EmailAddress]
+        [Required]
         public string Email { get; set; } = string.Empty;
 
         [Required]

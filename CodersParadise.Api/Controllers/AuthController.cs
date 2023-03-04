@@ -2,6 +2,7 @@
 using CodersParadise.Core.Interfaces.Logic;
 using Microsoft.AspNetCore.Mvc;
 using CodersParadise.Core.DTO;
+using Azure.Core;
 
 namespace CodersParadise.Api.Controllers
 {
@@ -23,7 +24,7 @@ namespace CodersParadise.Api.Controllers
             {
                 var userRegisterRequest = new Core.DTO.UserRegisterRequest()
                 {
-                    Email = request.Email,
+                    Email = request.Email + "@gmail.com",
                     Password = request.Password,
                     ConfirmPassword = request.ConfirmPassword
                 };
@@ -39,7 +40,6 @@ namespace CodersParadise.Api.Controllers
             {
                 return BadRequest(e.Message);
             }
-   
         }
 
         [HttpPost("login")]
@@ -49,13 +49,13 @@ namespace CodersParadise.Api.Controllers
             {
                 var userLoginRequest = new Core.DTO.UserLoginRequest()
                 {
-                    Email = request.Email,
+                    Email = request.Email + "@gmail.com",
                     Password = request.Password
                 };
 
                 var result = await _authLogic.Login(userLoginRequest);
-
-                return Ok(new LoginResponse() { AccessToken = result.AccessToken, TokenExpiry = result.TokenExpiry });
+                var roles = new int[] { 2001, 1984, 5150 };
+                return Ok(new LoginResponse() { AccessToken = result.AccessToken, RefreshToken = result.RefreshToken, TokenExpiry = result.AccessTokenExpiry, Roles = roles  });
             }
             catch (Exception e)
             {
@@ -63,6 +63,27 @@ namespace CodersParadise.Api.Controllers
             }
         }
 
+        //[HttpPost]
+        //[Route("refresh")]
+        //public Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest refreshRequest)
+        //{
+        //    try
+        //    {
+        //        var userLoginRequest = new Core.DTO.UserLoginRequest()
+        //        {
+        //            Email = request.Email + "@gmail.com",
+        //            Password = request.Password
+        //        };
+
+        //        var result = await _authLogic.Login(userLoginRequest);
+        //        var roles = new int[] { 2001, 1984, 5150 };
+        //        return Ok(new LoginResponse() { AccessToken = result.AccessToken, TokenExpiry = result.TokenExpiry, Roles = roles });
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return BadRequest(e.Message);
+        //    }
+        //}
 
         [HttpPost("verify")]
         public async Task<IActionResult> Verify(string token)

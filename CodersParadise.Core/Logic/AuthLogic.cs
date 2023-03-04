@@ -1,10 +1,6 @@
 ﻿using CodersParadise.Core.DTO;
 using CodersParadise.Core.Interfaces.Logic;
 using CodersParadise.Core.Interfaces.Services;
-using CodersParadise.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -40,7 +36,7 @@ namespace CodersParadise.Core.Logic
             return response;
         }
 
-        public async Task<JwtAccessToken> Login(UserLoginRequest request)
+        public async Task<UserLoginResponse> Login(UserLoginRequest request)
         {
             var user = await _authService.GetUserByEmail(request.Email);
 
@@ -55,7 +51,15 @@ namespace CodersParadise.Core.Logic
             if(user.VerifiedDate == null)
                 throw new Exception("Not Verified");
 
-            return _jwtService.GenerateAccessToken(user.Id, request.Email);
+            var accessToken = _jwtService.GenerateAccessToken(user.Id, request.Email);
+            var refreshToken = _jwtService.GenerateRefreshToken();
+
+            return new UserLoginResponse()
+            {
+                AccessToken = accessToken.AccessToken,
+                RefreshToken= refreshToken.RefreshToken,
+                AccessTokenExpiry = accessToken.TokenExpiry
+            };
         }
 
         public async Task Verify(string token)
@@ -93,6 +97,57 @@ namespace CodersParadise.Core.Logic
 
             await _authService.UpdateUserPassword(user);
         }
+
+        public async Task<string> RefreshToken(RefreshTokenRequest refreshRequest)
+        {
+            var validatedExpiredAccessToken = _jwtService.ValidateAccessToken(refreshRequest.ExpiredAccessToken);
+
+            if (!validatedExpiredAccessToken)
+            {
+                throw new Exception("Jwt access token has not expired");
+            }
+
+            var jwtId = _jwtService.GetAndValidateRefreshToken(refreshRequest.RefreshToken);
+
+            //var storedRefreshTokenResponse = await _jwtClient.GetRefreshToken(jwtId);
+
+            //if (storedRefreshTokenResponse.Data == null)
+            //{
+            //    throw new ApiException(HttpStatusCode.BadRequest, Enums.ErrorCode.NoteError, "Refresh token not found from storage.");
+            //}
+
+            //if (storedRefreshTokenResponse.Error)
+            //{
+            //    throw new ApiException(HttpStatusCode.InternalServerError, Enums.ErrorCode.Unknown, "Failed to retreive refresh token from storage.");
+            //}
+
+            //string sessionId = storedRefreshTokenResponse.Data.SessionId;
+
+            //var userResponse = await _userDataClient.GetUser(storedRefreshTokenResponse.Data.UserId, true);
+
+            //if (userResponse.Error)
+            //{
+            //    throw new ApiException(HttpStatusCode.InternalServerError, Enums.ErrorCode.Unknown, userResponse.ApiStatusMessage);
+            //}
+
+            ////Generate New Tokens
+            //var accessToken = _accessTokenGenerator.GenerateToken(userResponse.Data.CompanyId, userResponse.Data.Id, userResponse.Data.UserName, sessionId);
+            //var refreshToken = _refreshTokenGenerator.GenerateToken(userResponse.Data.Id, userResponse.Data.UserName);
+            //await StoreRefreshToken(refreshToken, userResponse.Data.Id, sessionId);
+
+            ////Delete Old Refresh Token
+            //Task.Run(() => _jwtClient.DeleteRefreshToken(jwtId));
+
+            //return new TokenAuthenticationResponse
+            //{
+            //    AccessToken = accessToken.Token,
+            //    RefreshToken = refreshToken.Token
+            //};
+            return null;
+        }
+
+
+
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
