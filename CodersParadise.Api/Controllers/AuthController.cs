@@ -2,7 +2,6 @@
 using CodersParadise.Core.Interfaces.Logic;
 using Microsoft.AspNetCore.Mvc;
 using CodersParadise.Core.DTO;
-using Azure.Core;
 
 namespace CodersParadise.Api.Controllers
 {
@@ -63,27 +62,26 @@ namespace CodersParadise.Api.Controllers
             }
         }
 
-        //[HttpPost]
-        //[Route("refresh")]
-        //public Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest refreshRequest)
-        //{
-        //    try
-        //    {
-        //        var userLoginRequest = new Core.DTO.UserLoginRequest()
-        //        {
-        //            Email = request.Email + "@gmail.com",
-        //            Password = request.Password
-        //        };
+        [HttpPost]
+        [Route("refresh")]
+        public async Task<IActionResult> RefreshToken([FromBody] ApiModels.RefreshTokenRequest refreshRequest)
+        {
+            try
+            {
+                var refreshTokenRequest = new Core.DTO.RefreshTokenRequest()
+                {
+                    ExpiredAccessToken = refreshRequest.ExpiredAccessToken,
+                    RefreshToken = refreshRequest.RefreshToken
+                };
 
-        //        var result = await _authLogic.Login(userLoginRequest);
-        //        var roles = new int[] { 2001, 1984, 5150 };
-        //        return Ok(new LoginResponse() { AccessToken = result.AccessToken, TokenExpiry = result.TokenExpiry, Roles = roles });
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return BadRequest(e.Message);
-        //    }
-        //}
+                var result = await _authLogic.RefreshToken(refreshTokenRequest);
+                return Ok(new LoginResponse() { AccessToken = result.AccessToken, TokenExpiry = result.AccessTokenExpiry, RefreshToken = result.RefreshToken });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
         [HttpPost("verify")]
         public async Task<IActionResult> Verify(string token)

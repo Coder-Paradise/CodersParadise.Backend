@@ -18,7 +18,7 @@ namespace CodersParadise.DataAccess.JwtService
             _jwtConfig = jwtConfig;
         }
 
-        public string GetAndValidateRefreshToken(string refreshToken)
+        public Guid GetAndValidateRefreshToken(string refreshToken)
         {
             var validationParameters = SetTokenValidationParameters(_jwtConfig.RefreshTokenSecretKey, true, SecurityAlgorithms.HmacSha256);
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
@@ -30,7 +30,7 @@ namespace CodersParadise.DataAccess.JwtService
                 if (validatedToken.Id == null)
                     throw new();
 
-                return validatedToken.Id;
+                return new Guid(validatedToken.Id);
             }
             catch (Exception)
             {

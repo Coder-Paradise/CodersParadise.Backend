@@ -36,7 +36,7 @@ namespace CodersParadise.Core.Services
             return response;
         }
 
-        public string GetAndValidateRefreshToken(string refreshToken)
+        public Guid GetAndValidateRefreshToken(string refreshToken)
         {
             var response = _tokenValidator.GetAndValidateRefreshToken(refreshToken);
             return response;

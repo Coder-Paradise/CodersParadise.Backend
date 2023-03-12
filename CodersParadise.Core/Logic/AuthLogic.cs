@@ -1,6 +1,7 @@
 ﻿using CodersParadise.Core.DTO;
 using CodersParadise.Core.Interfaces.Logic;
 using CodersParadise.Core.Interfaces.Services;
+using CodersParadise.Core.Models;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -53,6 +54,7 @@ namespace CodersParadise.Core.Logic
 
             var accessToken = _jwtService.GenerateAccessToken(user.Id, request.Email);
             var refreshToken = _jwtService.GenerateRefreshToken();
+            await _authService.StoreRefreshToken(refreshToken, user.Id);
 
             return new UserLoginResponse()
             {
@@ -98,7 +100,7 @@ namespace CodersParadise.Core.Logic
             await _authService.UpdateUserPassword(user);
         }
 
-        public async Task<string> RefreshToken(RefreshTokenRequest refreshRequest)
+        public async Task<UserLoginResponse> RefreshToken(RefreshTokenRequest refreshRequest)
         {
             var validatedExpiredAccessToken = _jwtService.ValidateAccessToken(refreshRequest.ExpiredAccessToken);
 
@@ -109,45 +111,35 @@ namespace CodersParadise.Core.Logic
 
             var jwtId = _jwtService.GetAndValidateRefreshToken(refreshRequest.RefreshToken);
 
-            //var storedRefreshTokenResponse = await _jwtClient.GetRefreshToken(jwtId);
+            var storedRefreshTokenResponse = await _authService.GetRefreshToken(jwtId);
 
-            //if (storedRefreshTokenResponse.Data == null)
-            //{
-            //    throw new ApiException(HttpStatusCode.BadRequest, Enums.ErrorCode.NoteError, "Refresh token not found from storage.");
-            //}
+            if (storedRefreshTokenResponse == null)
+            {
+                throw new Exception("Refresh token not found from storage.");
+            }
 
-            //if (storedRefreshTokenResponse.Error)
-            //{
-            //    throw new ApiException(HttpStatusCode.InternalServerError, Enums.ErrorCode.Unknown, "Failed to retreive refresh token from storage.");
-            //}
+            var userResponse = await _authService.GetUserById(storedRefreshTokenResponse.UserId);
 
-            //string sessionId = storedRefreshTokenResponse.Data.SessionId;
+            if (userResponse == null)
+            {
+                throw new Exception("User not found.");
+            }
 
-            //var userResponse = await _userDataClient.GetUser(storedRefreshTokenResponse.Data.UserId, true);
+            //Generate New Tokens
+            var accessToken = _jwtService.GenerateAccessToken(userResponse.Id, userResponse.Email);
+            var refreshToken = _jwtService.GenerateRefreshToken();
+            await _authService.StoreRefreshToken(refreshToken, userResponse.Id);
 
-            //if (userResponse.Error)
-            //{
-            //    throw new ApiException(HttpStatusCode.InternalServerError, Enums.ErrorCode.Unknown, userResponse.ApiStatusMessage);
-            //}
+            //Delete Old Refresh Token
+            await _authService.DeleteRefreshToken(jwtId);
 
-            ////Generate New Tokens
-            //var accessToken = _accessTokenGenerator.GenerateToken(userResponse.Data.CompanyId, userResponse.Data.Id, userResponse.Data.UserName, sessionId);
-            //var refreshToken = _refreshTokenGenerator.GenerateToken(userResponse.Data.Id, userResponse.Data.UserName);
-            //await StoreRefreshToken(refreshToken, userResponse.Data.Id, sessionId);
-
-            ////Delete Old Refresh Token
-            //Task.Run(() => _jwtClient.DeleteRefreshToken(jwtId));
-
-            //return new TokenAuthenticationResponse
-            //{
-            //    AccessToken = accessToken.Token,
-            //    RefreshToken = refreshToken.Token
-            //};
-            return null;
+            return new UserLoginResponse
+            {
+                AccessToken = accessToken.AccessToken,
+                RefreshToken = refreshToken.RefreshToken,
+                AccessTokenExpiry = accessToken.TokenExpiry
+            };
         }
-
-
-
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {

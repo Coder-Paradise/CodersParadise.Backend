@@ -1,6 +1,7 @@
 ﻿using CodersParadise.Core.DTO;
 using CodersParadise.Core.Interfaces.Repositories;
 using CodersParadise.Core.Interfaces.Services;
+using CodersParadise.Core.Models;
 
 namespace CodersParadise.Core.Services
 {
@@ -31,6 +32,12 @@ namespace CodersParadise.Core.Services
             return response;
         }
 
+        public async Task<Models.User?> GetUserById(int userId)
+        {
+            var response = await _authRepository.GetUserById(userId);
+            return response;
+        }
+
         public async Task<Models.User?> GetUserByResetToken(string resetToken)
         {
             var response = await _authRepository.GetUserByResetToken(resetToken);
@@ -50,6 +57,22 @@ namespace CodersParadise.Core.Services
         public async Task UpdateUserPassword(Models.User user)
         {
             await _authRepository.UpdateUserPassword(user);
+        }
+
+        public async Task StoreRefreshToken(JwtRefreshToken refreshToken, int userId)
+        {     
+            await _authRepository.StoreRefreshToken(refreshToken, userId);
+        }
+
+        public async Task DeleteRefreshToken(Guid jwtId)
+        {
+            await _authRepository.DeleteRefreshToken(jwtId);
+        }
+
+        public async Task<JwtRefreshToken?> GetRefreshToken(Guid jwtId)
+        {
+            var response = await _authRepository.GetRefreshToken(jwtId);
+            return response;
         }
     }
 }

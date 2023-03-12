@@ -24,7 +24,7 @@ namespace CodersParadise.DataAccess.JwtService
 
             var refreshToken = TokenGenerator.GenerateToken(
                 _jwtConfig.RefreshTokenSecretKey,
-                SecurityAlgorithms.HmacSha512,
+                SecurityAlgorithms.HmacSha256,
                 _jwtConfig.Issuer,
                 _jwtConfig.Audience,
                 _jwtConfig.RefreshTokenExpirationMinutes,
@@ -32,6 +32,7 @@ namespace CodersParadise.DataAccess.JwtService
 
             return new JwtRefreshToken()
             {
+                JwtId = new Guid(refreshToken.TokenDefinition.Id),
                 RefreshToken = refreshToken.Token,
                 TokenExpiry = refreshToken.TokenDefinition.ValidTo
             };

@@ -37,7 +37,11 @@ namespace CodersParadise.DataAccess.Databases.CodersParadise
             {
                 entity.HasKey(e => e.JwtId);
 
-                entity.Property(e => e.Token).HasMaxLength(500);       
+                entity.Property(e => e.Token).HasMaxLength(500);
+
+                entity.Property(e => e.CreationDate)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())");
             });
 
         }

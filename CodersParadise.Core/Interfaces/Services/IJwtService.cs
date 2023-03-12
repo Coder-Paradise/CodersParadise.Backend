@@ -10,6 +10,6 @@ namespace CodersParadise.Core.Interfaces.Services
 
         bool ValidateAccessToken(string accessToken);
 
-        string GetAndValidateRefreshToken(string refreshToken);
+        Guid GetAndValidateRefreshToken(string refreshToken);
     }
 }

@@ -47,6 +47,22 @@ namespace CodersParadise.DataAccess.Respositories
             };
         }
 
+        public async Task<Core.Models.User?> GetUserById(int userId)
+        {
+            var user = await _dbContext.Users.Where(x => x.Id == userId).FirstOrDefaultAsync();
+
+            if (user == null) return null;
+
+            return new Core.Models.User
+            {
+                Id = user.Id,
+                Email = user.Email,
+                VerifiedDate = user.VerifiedDate,
+                PasswordSalt = user.PasswordSalt,
+                PasswordHash = user.PasswordHash
+            };
+        }
+
         public async Task<Core.Models.User?> GetUserByResetToken(string token)
         {
             var user = await _dbContext.Users.Where(x => x.PasswordResetToken == token).FirstOrDefaultAsync();
@@ -107,6 +123,43 @@ namespace CodersParadise.DataAccess.Respositories
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync();
             return true;
+        }
+
+        public async Task StoreRefreshToken(Core.Models.JwtRefreshToken refreshToken, int userId)
+        {
+            var token = new RefreshToken
+            {
+                JwtId = refreshToken.JwtId,
+                UserId = userId,
+                Token = refreshToken.RefreshToken,
+                ExpirationDate = refreshToken.TokenExpiry
+            };
+
+            _dbContext.RefreshTokens.Add(token);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<Core.Models.JwtRefreshToken?> GetRefreshToken(Guid jwtId)
+        {
+            var token = await _dbContext.RefreshTokens.Where(x => x.JwtId == jwtId).FirstOrDefaultAsync();
+
+            if (token == null) return null;
+
+            return new Core.Models.JwtRefreshToken
+            {
+                JwtId = token.JwtId,
+                RefreshToken = token.Token,
+                TokenExpiry = token.ExpirationDate,
+                UserId = token.UserId
+            };
+        }
+
+        public async Task DeleteRefreshToken(Guid jwtId)
+        {
+            var token = await _dbContext.RefreshTokens.Where(x => x.JwtId == jwtId).FirstOrDefaultAsync();
+            if (token == null) return;
+            _dbContext.RefreshTokens.Remove(token);
+            await _dbContext.SaveChangesAsync();
         }
     }
 }
