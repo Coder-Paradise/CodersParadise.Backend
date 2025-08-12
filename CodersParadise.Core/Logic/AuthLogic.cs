@@ -20,7 +20,7 @@ namespace CodersParadise.Core.Logic
 
         public async Task<bool> Register(UserRegisterRequest request)
         {
-            var existingUser = await _authService.GetUserByEmail(request.Email);
+            var existingUser = await _authService.GetUserByUsername(request.Username);
 
             if (existingUser != null)
                 throw new Exception("User already exists");
@@ -39,20 +39,16 @@ namespace CodersParadise.Core.Logic
 
         public async Task<UserLoginResponse> Login(UserLoginRequest request)
         {
-            var user = await _authService.GetUserByEmail(request.Email);
-
-            if (user == null)
-                throw new Exception("User not found");
-
+            var user = await _authService.GetUserByUsername(request.Username) ?? throw new UnauthorizedAccessException("User not found");
             if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
             {
-                throw new Exception("Password is incorrect.");
+                throw new UnauthorizedAccessException("Password is incorrect.");
             }
 
             if(user.VerifiedDate == null)
                 throw new Exception("Not Verified");
 
-            var accessToken = _jwtService.GenerateAccessToken(user.Id, request.Email);
+            var accessToken = _jwtService.GenerateAccessToken(user.Id, request.Username);
             var refreshToken = _jwtService.GenerateRefreshToken();
             await _authService.StoreRefreshToken(refreshToken, user.Id);
 
@@ -74,9 +70,9 @@ namespace CodersParadise.Core.Logic
             await _authService.UpdateUserVerifiedDate(user.Id, DateTime.UtcNow);
         }
 
-        public async Task ForgotPassword(string email)
+        public async Task ForgotPassword(string username)
         {
-            var user = await _authService.GetUserByEmail(email);
+            var user = await _authService.GetUserByUsername(username);
 
             if (user == null)
                 throw new Exception("User not found");
@@ -126,7 +122,7 @@ namespace CodersParadise.Core.Logic
             }
 
             //Generate New Tokens
-            var accessToken = _jwtService.GenerateAccessToken(userResponse.Id, userResponse.Email);
+            var accessToken = _jwtService.GenerateAccessToken(userResponse.Id, userResponse.Username);
             var refreshToken = _jwtService.GenerateRefreshToken();
             await _authService.StoreRefreshToken(refreshToken, userResponse.Id);
 

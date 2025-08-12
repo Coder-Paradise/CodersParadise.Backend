@@ -7,7 +7,7 @@ namespace CodersParadise.Core.Interfaces.Services
     {
         Task<bool> Register(UserRegisterRequest request);
 
-        Task<Models.User?> GetUserByEmail(string email);
+        Task<Models.User?> GetUserByUsername(string username);
 
         Task<Models.User?> GetUserByToken(string token);
 

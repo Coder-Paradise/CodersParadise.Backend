@@ -20,9 +20,9 @@ namespace CodersParadise.Core.Services
             return response;
         }
 
-        public async Task<Models.User?> GetUserByEmail(string email)
+        public async Task<Models.User?> GetUserByUsername(string username)
         {
-            var response = await _authRepository.GetUserByEmail(email);
+            var response = await _authRepository.GetUserByUsername(username);
             return response;
         }
 

@@ -15,15 +15,16 @@ namespace CodersParadise.DataAccess.Respositories
             _dbContext = dbContext;
         }
 
-        public async Task<Core.Models.User?> GetUserByEmail(string email)
+        public async Task<Core.Models.User?> GetUserByUsername(string username)
         {
-            var user = await _dbContext.Users.Where(x => x.Email == email).FirstOrDefaultAsync();
+            var user = await _dbContext.Users.Where(x => x.Username == username).FirstOrDefaultAsync();
 
             if (user == null) return null;
 
             return new Core.Models.User
             {
                 Id = user.Id,
+                Username = user.Username,
                 Email = user.Email,
                 VerifiedDate = user.VerifiedDate,
                 PasswordSalt = user.PasswordSalt,   
@@ -40,6 +41,7 @@ namespace CodersParadise.DataAccess.Respositories
             return new Core.Models.User
             {
                 Id = user.Id,
+                Username= user.Username,
                 Email = user.Email,
                 VerifiedDate = user.VerifiedDate,
                 PasswordSalt = user.PasswordSalt,
@@ -56,6 +58,7 @@ namespace CodersParadise.DataAccess.Respositories
             return new Core.Models.User
             {
                 Id = user.Id,
+                Username = user.Username,
                 Email = user.Email,
                 VerifiedDate = user.VerifiedDate,
                 PasswordSalt = user.PasswordSalt,
@@ -72,6 +75,7 @@ namespace CodersParadise.DataAccess.Respositories
             return new Core.Models.User
             {
                 Id = user.Id,
+                Username = user.Username,
                 Email = user.Email,
                 VerifiedDate = user.VerifiedDate,
                 PasswordSalt = user.PasswordSalt,
@@ -114,6 +118,7 @@ namespace CodersParadise.DataAccess.Respositories
         {
             var user = new User
             {
+                Username = request.Username,
                 Email = request.Email,
                 PasswordHash = request.PasswordHash,
                 PasswordSalt = request.PasswordSalt,

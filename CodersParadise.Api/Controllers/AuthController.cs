@@ -23,9 +23,10 @@ namespace CodersParadise.Api.Controllers
             {
                 var userRegisterRequest = new Core.DTO.UserRegisterRequest()
                 {
-                    Email = request.Email + "@gmail.com",
+                    Username = request.Username,
                     Password = request.Password,
-                    ConfirmPassword = request.ConfirmPassword
+                    ConfirmPassword = request.ConfirmPassword,
+                    Email = request.Email
                 };
 
                 var result = await _authLogic.Register(userRegisterRequest);
@@ -48,13 +49,17 @@ namespace CodersParadise.Api.Controllers
             {
                 var userLoginRequest = new Core.DTO.UserLoginRequest()
                 {
-                    Email = request.Email + "@gmail.com",
+                    Username = request.Username,
                     Password = request.Password
                 };
 
                 var result = await _authLogic.Login(userLoginRequest);
                 var roles = new int[] { 2001, 1984, 5150 };
                 return Ok(new LoginResponse() { AccessToken = result.AccessToken, RefreshToken = result.RefreshToken, TokenExpiry = result.AccessTokenExpiry, Roles = roles  });
+            }
+            catch(UnauthorizedAccessException e)
+            {
+                return Unauthorized(e.Message);
             }
             catch (Exception e)
             {

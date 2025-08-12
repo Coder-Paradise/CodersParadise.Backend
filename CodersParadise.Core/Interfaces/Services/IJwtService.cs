@@ -4,7 +4,7 @@ namespace CodersParadise.Core.Interfaces.Services
 {
     public interface IJwtService
     {
-        JwtAccessToken GenerateAccessToken(long userId, string userName);
+        JwtAccessToken GenerateAccessToken(long userId, string username);
 
         JwtRefreshToken GenerateRefreshToken();
 

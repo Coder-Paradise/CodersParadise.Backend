@@ -18,9 +18,9 @@ namespace CodersParadise.Core.Services
             _refreshTokenGenerator = refreshTokenGenerator;
             _tokenValidator = tokenValidator;
         }
-        public JwtAccessToken GenerateAccessToken(long userId, string userName)
+        public JwtAccessToken GenerateAccessToken(long userId, string username)
         {
-            var response = _accessTokenGenerator.GenerateToken(userId, userName);
+            var response = _accessTokenGenerator.GenerateToken(userId, username);
             return response;
         }
 
