@@ -23,9 +23,10 @@ namespace CodersParadise.Api.Controllers
             {
                 var userRegisterRequest = new Core.DTO.UserRegisterRequest()
                 {
-                    Email = request.Email,
+                    Username = request.Username,
                     Password = request.Password,
-                    ConfirmPassword = request.ConfirmPassword
+                    ConfirmPassword = request.ConfirmPassword,
+                    Email = request.Email
                 };
 
                 var result = await _authLogic.Register(userRegisterRequest);
@@ -39,7 +40,6 @@ namespace CodersParadise.Api.Controllers
             {
                 return BadRequest(e.Message);
             }
-   
         }
 
         [HttpPost("login")]
@@ -49,13 +49,17 @@ namespace CodersParadise.Api.Controllers
             {
                 var userLoginRequest = new Core.DTO.UserLoginRequest()
                 {
-                    Email = request.Email,
+                    Username = request.Username,
                     Password = request.Password
                 };
 
                 var result = await _authLogic.Login(userLoginRequest);
-
-                return Ok(new LoginResponse() { AccessToken = result.AccessToken, TokenExpiry = result.TokenExpiry });
+                var roles = new int[] { 2001, 1984, 5150 };
+                return Ok(new LoginResponse() { AccessToken = result.AccessToken, RefreshToken = result.RefreshToken, TokenExpiry = result.AccessTokenExpiry, Roles = roles  });
+            }
+            catch(UnauthorizedAccessException e)
+            {
+                return Unauthorized(e.Message);
             }
             catch (Exception e)
             {
@@ -63,6 +67,26 @@ namespace CodersParadise.Api.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("refresh")]
+        public async Task<IActionResult> RefreshToken([FromBody] ApiModels.RefreshTokenRequest refreshRequest)
+        {
+            try
+            {
+                var refreshTokenRequest = new Core.DTO.RefreshTokenRequest()
+                {
+                    ExpiredAccessToken = refreshRequest.ExpiredAccessToken,
+                    RefreshToken = refreshRequest.RefreshToken
+                };
+
+                var result = await _authLogic.RefreshToken(refreshTokenRequest);
+                return Ok(new LoginResponse() { AccessToken = result.AccessToken, TokenExpiry = result.AccessTokenExpiry, RefreshToken = result.RefreshToken });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
         [HttpPost("verify")]
         public async Task<IActionResult> Verify(string token)

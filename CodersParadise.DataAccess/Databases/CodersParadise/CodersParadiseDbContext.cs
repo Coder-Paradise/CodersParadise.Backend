@@ -29,6 +29,21 @@ namespace CodersParadise.DataAccess.Databases.CodersParadise
 
         public DbSet<User> Users => Set<User>();
 
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<RefreshToken>(entity =>
+            {
+                entity.HasKey(e => e.JwtId);
+
+                entity.Property(e => e.Token).HasMaxLength(500);
+
+                entity.Property(e => e.CreationDate)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())");
+            });
+
+        }
     }
 }

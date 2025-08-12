@@ -2,9 +2,6 @@
 using CodersParadise.Core.Interfaces.Logic;
 using CodersParadise.Core.Interfaces.Services;
 using CodersParadise.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -23,7 +20,7 @@ namespace CodersParadise.Core.Logic
 
         public async Task<bool> Register(UserRegisterRequest request)
         {
-            var existingUser = await _authService.GetUserByEmail(request.Email);
+            var existingUser = await _authService.GetUserByUsername(request.Username);
 
             if (existingUser != null)
                 throw new Exception("User already exists");
@@ -40,22 +37,27 @@ namespace CodersParadise.Core.Logic
             return response;
         }
 
-        public async Task<JwtAccessToken> Login(UserLoginRequest request)
+        public async Task<UserLoginResponse> Login(UserLoginRequest request)
         {
-            var user = await _authService.GetUserByEmail(request.Email);
-
-            if (user == null)
-                throw new Exception("User not found");
-
+            var user = await _authService.GetUserByUsername(request.Username) ?? throw new UnauthorizedAccessException("User not found");
             if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
             {
-                throw new Exception("Password is incorrect.");
+                throw new UnauthorizedAccessException("Password is incorrect.");
             }
 
             if(user.VerifiedDate == null)
                 throw new Exception("Not Verified");
 
-            return _jwtService.GenerateAccessToken(user.Id, request.Email);
+            var accessToken = _jwtService.GenerateAccessToken(user.Id, request.Username);
+            var refreshToken = _jwtService.GenerateRefreshToken();
+            await _authService.StoreRefreshToken(refreshToken, user.Id);
+
+            return new UserLoginResponse()
+            {
+                AccessToken = accessToken.AccessToken,
+                RefreshToken= refreshToken.RefreshToken,
+                AccessTokenExpiry = accessToken.TokenExpiry
+            };
         }
 
         public async Task Verify(string token)
@@ -68,9 +70,9 @@ namespace CodersParadise.Core.Logic
             await _authService.UpdateUserVerifiedDate(user.Id, DateTime.UtcNow);
         }
 
-        public async Task ForgotPassword(string email)
+        public async Task ForgotPassword(string username)
         {
-            var user = await _authService.GetUserByEmail(email);
+            var user = await _authService.GetUserByUsername(username);
 
             if (user == null)
                 throw new Exception("User not found");
@@ -92,6 +94,47 @@ namespace CodersParadise.Core.Logic
             user.TokenExpiry = null;
 
             await _authService.UpdateUserPassword(user);
+        }
+
+        public async Task<UserLoginResponse> RefreshToken(RefreshTokenRequest refreshRequest)
+        {
+            var validatedExpiredAccessToken = _jwtService.ValidateAccessToken(refreshRequest.ExpiredAccessToken);
+
+            if (!validatedExpiredAccessToken)
+            {
+                throw new Exception("Jwt access token has not expired");
+            }
+
+            var jwtId = _jwtService.GetAndValidateRefreshToken(refreshRequest.RefreshToken);
+
+            var storedRefreshTokenResponse = await _authService.GetRefreshToken(jwtId);
+
+            if (storedRefreshTokenResponse == null)
+            {
+                throw new Exception("Refresh token not found from storage.");
+            }
+
+            var userResponse = await _authService.GetUserById(storedRefreshTokenResponse.UserId);
+
+            if (userResponse == null)
+            {
+                throw new Exception("User not found.");
+            }
+
+            //Generate New Tokens
+            var accessToken = _jwtService.GenerateAccessToken(userResponse.Id, userResponse.Username);
+            var refreshToken = _jwtService.GenerateRefreshToken();
+            await _authService.StoreRefreshToken(refreshToken, userResponse.Id);
+
+            //Delete Old Refresh Token
+            await _authService.DeleteRefreshToken(jwtId);
+
+            return new UserLoginResponse
+            {
+                AccessToken = accessToken.AccessToken,
+                RefreshToken = refreshToken.RefreshToken,
+                AccessTokenExpiry = accessToken.TokenExpiry
+            };
         }
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)

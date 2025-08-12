@@ -4,6 +4,7 @@ using CodersParadise.DataAccess.Databases.CodersParadise;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CodersParadise.DataAccess.Migrations
 {
     [DbContext(typeof(CodersParadiseDbContext))]
-    partial class CodersParadiseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230305050333_RefreshToken")]
+    partial class RefreshToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,14 +27,14 @@ namespace CodersParadise.DataAccess.Migrations
 
             modelBuilder.Entity("CodersParadise.DataAccess.Databases.CodersParadise.Models.RefreshToken", b =>
                 {
-                    b.Property<Guid>("JwtId")
+                    b.Property<int>("JwtId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("JwtId"));
 
                     b.Property<DateTime>("CreationDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("(getutcdate())");
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("ExpirationDate")
                         .HasColumnType("datetime2");
