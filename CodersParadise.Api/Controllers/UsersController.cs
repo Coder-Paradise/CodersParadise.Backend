@@ -16,8 +16,8 @@ namespace CodersParadise.Api.Controllers
             {
                 var users = new List<UserResponse>()
                 {
-                    new UserResponse() { Email = "bababooey@gmail.com"},
-                    new UserResponse() { Email = "amimaryan@yahoo.com"}
+                    new UserResponse() { Username = "bababooey@gmail.com"},
+                    new UserResponse() { Username = "amimaryan@yahoo.com"}
                 };
                 return Ok(users);
             }
