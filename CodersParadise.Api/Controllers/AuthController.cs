@@ -55,7 +55,11 @@ namespace CodersParadise.Api.Controllers
 
                 var result = await _authLogic.Login(userLoginRequest);
                 var roles = new int[] { 2001, 1984, 5150 };
-                return Ok(new LoginResponse() { AccessToken = result.AccessToken, RefreshToken = result.RefreshToken, TokenExpiry = result.AccessTokenExpiry, Roles = roles  });
+
+                SetTokensInsideCookie(result.AccessToken, result.RefreshToken, HttpContext);
+
+                //return Ok(new LoginResponse() { AccessToken = result.AccessToken, RefreshToken = result.RefreshToken, TokenExpiry = result.AccessTokenExpiry, Roles = roles  });
+                return Ok(new LoginResponse() { AccessToken = result.AccessToken, Roles = roles });
             }
             catch(UnauthorizedAccessException e)
             {
@@ -67,20 +71,26 @@ namespace CodersParadise.Api.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("refresh")]
-        public async Task<IActionResult> RefreshToken([FromBody] ApiModels.RefreshTokenRequest refreshRequest)
+        //public async Task<IActionResult> RefreshToken([FromBody] ApiModels.RefreshTokenRequest refreshRequest)
+        public async Task<IActionResult> RefreshToken()
         {
             try
             {
+                HttpContext.Request.Cookies.TryGetValue("accessToken", out var accessToken);
+                HttpContext.Request.Cookies.TryGetValue("refreshToken", out var refreshToken);
+
                 var refreshTokenRequest = new Core.DTO.RefreshTokenRequest()
                 {
-                    ExpiredAccessToken = refreshRequest.ExpiredAccessToken,
-                    RefreshToken = refreshRequest.RefreshToken
+                    ExpiredAccessToken = accessToken ?? string.Empty,
+                    RefreshToken = refreshToken ?? string.Empty
                 };
 
                 var result = await _authLogic.RefreshToken(refreshTokenRequest);
-                return Ok(new LoginResponse() { AccessToken = result.AccessToken, TokenExpiry = result.AccessTokenExpiry, RefreshToken = result.RefreshToken });
+                SetTokensInsideCookie(result.AccessToken, result.RefreshToken, HttpContext);
+
+                return Ok();
             }
             catch (Exception e)
             {
@@ -135,6 +145,30 @@ namespace CodersParadise.Api.Controllers
             {
                 return BadRequest(e.Message);
             }
+        }
+
+        [ApiExplorerSettings(IgnoreApi = true)]
+        public void SetTokensInsideCookie(string accessToken, string refreshToken, HttpContext context)
+        {
+            context.Response.Cookies.Append("accessToken", accessToken,
+                new CookieOptions
+                {
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(10),
+                    HttpOnly = true,
+                    IsEssential = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.None
+                });
+
+            context.Response.Cookies.Append("refreshToken", refreshToken,
+                new CookieOptions
+                {
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(131400),
+                    HttpOnly = true,
+                    IsEssential = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.None
+                });     
         }
     }
 }

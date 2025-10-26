@@ -57,7 +57,8 @@ namespace CodersParadise.DataAccess.JwtService
         public bool ValidateAccessToken(string accessToken)
         {
             var securityToken = ValidateExpiredAccessToken(accessToken);
-            return CheckTokenExpired(securityToken.ValidTo);
+            return securityToken != null;
+            //return CheckTokenExpired(securityToken.ValidTo);
         }
 
 
