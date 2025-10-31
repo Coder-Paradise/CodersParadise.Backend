@@ -1,7 +1,8 @@
 ﻿using CodersParadise.Api.ApiModels;
+using CodersParadise.Core.DTO;
 using CodersParadise.Core.Interfaces.Logic;
 using Microsoft.AspNetCore.Mvc;
-using CodersParadise.Core.DTO;
+using System.Data;
 
 namespace CodersParadise.Api.Controllers
 {
@@ -71,6 +72,33 @@ namespace CodersParadise.Api.Controllers
             }
         }
 
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            try
+            {
+                HttpContext.Request.Cookies.TryGetValue("accessToken", out var accessToken);
+                HttpContext.Request.Cookies.TryGetValue("refreshToken", out var refreshToken);
+
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+                    Response.Cookies.Delete("accessToken");
+                }
+
+                if (!string.IsNullOrEmpty(refreshToken))
+                {
+                    Response.Cookies.Delete("refreshToken");
+                    await _authLogic.DeleteRefreshToken(refreshToken);
+                }
+
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpGet]
         [Route("refresh")]
         //public async Task<IActionResult> RefreshToken([FromBody] ApiModels.RefreshTokenRequest refreshRequest)
@@ -88,9 +116,10 @@ namespace CodersParadise.Api.Controllers
                 };
 
                 var result = await _authLogic.RefreshToken(refreshTokenRequest);
+                var roles = new int[] { 2001, 1984, 5150 };
                 SetTokensInsideCookie(result.AccessToken, result.RefreshToken, HttpContext);
 
-                return Ok();
+                return Ok(new LoginResponse() { AccessToken = result.AccessToken, Roles = roles });
             }
             catch (Exception e)
             {
