@@ -72,7 +72,7 @@ namespace CodersParadise.Api.Controllers
             }
         }
 
-        [HttpPost("logout")]
+        [HttpGet("logout")]
         public async Task<IActionResult> Logout()
         {
             try
@@ -82,12 +82,18 @@ namespace CodersParadise.Api.Controllers
 
                 if (!string.IsNullOrEmpty(accessToken))
                 {
-                    Response.Cookies.Delete("accessToken");
+
+                    Response.Cookies.Delete("accessToken",
+                       // Must match the original cookie's options (Domain, Path, Secure, etc.)
+                       GetCookieOptions(10));
                 }
 
                 if (!string.IsNullOrEmpty(refreshToken))
                 {
-                    Response.Cookies.Delete("refreshToken");
+
+                    Response.Cookies.Delete("refreshToken",
+                        // Must match the original cookie's options (Domain, Path, Secure, etc.)
+                        GetCookieOptions(131400));
                     await _authLogic.DeleteRefreshToken(refreshToken);
                 }
 
@@ -180,24 +186,22 @@ namespace CodersParadise.Api.Controllers
         public void SetTokensInsideCookie(string accessToken, string refreshToken, HttpContext context)
         {
             context.Response.Cookies.Append("accessToken", accessToken,
-                new CookieOptions
-                {
-                    Expires = DateTimeOffset.UtcNow.AddMinutes(10),
-                    HttpOnly = true,
-                    IsEssential = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.None
-                });
+                GetCookieOptions(10));
 
             context.Response.Cookies.Append("refreshToken", refreshToken,
-                new CookieOptions
-                {
-                    Expires = DateTimeOffset.UtcNow.AddMinutes(131400),
-                    HttpOnly = true,
-                    IsEssential = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.None
-                });     
+                GetCookieOptions(131400));     
+        }
+
+        private CookieOptions GetCookieOptions(int expiry)
+        {
+            return new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddMinutes(expiry),
+                HttpOnly = true,
+                IsEssential = true,
+                Secure = true,
+                SameSite = SameSiteMode.None
+            };
         }
     }
 }
