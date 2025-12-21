@@ -96,6 +96,21 @@ namespace CodersParadise.Core.Logic
             await _authService.UpdateUserPassword(user);
         }
 
+        public async Task DeleteRefreshToken(string refreshToken)
+        {
+            var jwtId = _jwtService.GetAndValidateRefreshToken(refreshToken);
+
+            var storedRefreshTokenResponse = await _authService.GetRefreshToken(jwtId);
+
+            if (storedRefreshTokenResponse == null)
+            {
+                throw new Exception("Refresh token not found from storage.");
+            }
+
+            //Delete Old Refresh Token
+            await _authService.DeleteRefreshToken(jwtId);
+        }
+
         public async Task<UserLoginResponse> RefreshToken(RefreshTokenRequest refreshRequest)
         {
             var validatedExpiredAccessToken = _jwtService.ValidateAccessToken(refreshRequest.ExpiredAccessToken);

@@ -1,7 +1,8 @@
 ﻿using CodersParadise.Api.ApiModels;
+using CodersParadise.Core.DTO;
 using CodersParadise.Core.Interfaces.Logic;
 using Microsoft.AspNetCore.Mvc;
-using CodersParadise.Core.DTO;
+using System.Data;
 
 namespace CodersParadise.Api.Controllers
 {
@@ -55,7 +56,11 @@ namespace CodersParadise.Api.Controllers
 
                 var result = await _authLogic.Login(userLoginRequest);
                 var roles = new int[] { 2001, 1984, 5150 };
-                return Ok(new LoginResponse() { AccessToken = result.AccessToken, RefreshToken = result.RefreshToken, TokenExpiry = result.AccessTokenExpiry, Roles = roles  });
+
+                SetTokensInsideCookie(result.AccessToken, result.RefreshToken, HttpContext);
+
+                //return Ok(new LoginResponse() { AccessToken = result.AccessToken, RefreshToken = result.RefreshToken, TokenExpiry = result.AccessTokenExpiry, Roles = roles  });
+                return Ok(new LoginResponse() { AccessToken = result.AccessToken, Roles = roles });
             }
             catch(UnauthorizedAccessException e)
             {
@@ -67,20 +72,60 @@ namespace CodersParadise.Api.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("refresh")]
-        public async Task<IActionResult> RefreshToken([FromBody] ApiModels.RefreshTokenRequest refreshRequest)
+        [HttpGet("logout")]
+        public async Task<IActionResult> Logout()
         {
             try
             {
+                HttpContext.Request.Cookies.TryGetValue("accessToken", out var accessToken);
+                HttpContext.Request.Cookies.TryGetValue("refreshToken", out var refreshToken);
+
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+
+                    Response.Cookies.Delete("accessToken",
+                       // Must match the original cookie's options (Domain, Path, Secure, etc.)
+                       GetCookieOptions(10));
+                }
+
+                if (!string.IsNullOrEmpty(refreshToken))
+                {
+
+                    Response.Cookies.Delete("refreshToken",
+                        // Must match the original cookie's options (Domain, Path, Secure, etc.)
+                        GetCookieOptions(131400));
+                    await _authLogic.DeleteRefreshToken(refreshToken);
+                }
+
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("refresh")]
+        //public async Task<IActionResult> RefreshToken([FromBody] ApiModels.RefreshTokenRequest refreshRequest)
+        public async Task<IActionResult> RefreshToken()
+        {
+            try
+            {
+                HttpContext.Request.Cookies.TryGetValue("accessToken", out var accessToken);
+                HttpContext.Request.Cookies.TryGetValue("refreshToken", out var refreshToken);
+
                 var refreshTokenRequest = new Core.DTO.RefreshTokenRequest()
                 {
-                    ExpiredAccessToken = refreshRequest.ExpiredAccessToken,
-                    RefreshToken = refreshRequest.RefreshToken
+                    ExpiredAccessToken = accessToken ?? string.Empty,
+                    RefreshToken = refreshToken ?? string.Empty
                 };
 
                 var result = await _authLogic.RefreshToken(refreshTokenRequest);
-                return Ok(new LoginResponse() { AccessToken = result.AccessToken, TokenExpiry = result.AccessTokenExpiry, RefreshToken = result.RefreshToken });
+                var roles = new int[] { 2001, 1984, 5150 };
+                SetTokensInsideCookie(result.AccessToken, result.RefreshToken, HttpContext);
+
+                return Ok(new LoginResponse() { AccessToken = result.AccessToken, Roles = roles });
             }
             catch (Exception e)
             {
@@ -135,6 +180,28 @@ namespace CodersParadise.Api.Controllers
             {
                 return BadRequest(e.Message);
             }
+        }
+
+        [ApiExplorerSettings(IgnoreApi = true)]
+        public void SetTokensInsideCookie(string accessToken, string refreshToken, HttpContext context)
+        {
+            context.Response.Cookies.Append("accessToken", accessToken,
+                GetCookieOptions(10));
+
+            context.Response.Cookies.Append("refreshToken", refreshToken,
+                GetCookieOptions(131400));     
+        }
+
+        private CookieOptions GetCookieOptions(int expiry)
+        {
+            return new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddMinutes(expiry),
+                HttpOnly = true,
+                IsEssential = true,
+                Secure = true,
+                SameSite = SameSiteMode.None
+            };
         }
     }
 }

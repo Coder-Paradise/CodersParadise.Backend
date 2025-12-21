@@ -16,5 +16,7 @@ namespace CodersParadise.Core.Interfaces.Logic
         Task ResetPassword(ResetPasswordRequestDTO request);
 
         Task<UserLoginResponse> RefreshToken(RefreshTokenRequest refreshRequest);
+
+        Task DeleteRefreshToken(string refreshRequest);
     }
 }
