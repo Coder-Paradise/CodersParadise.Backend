@@ -24,6 +24,11 @@ namespace CodersParadise.DataAccess.JwtService
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
+            //TODO: Roles Hardcoded for now and added to JWT Claims.  Will build roles architecture as future intiative.
+            var roles = new string[] { "2001", "1984", "5150" };
+            var roleClaims = roles.Select(roleId => new Claim(ClaimTypes.Role, roleId));
+            claims.AddRange(roleClaims);
+
             var accessToken = TokenGenerator.GenerateToken(
                 _jwtConfig.TokenSecretKey,
                 SecurityAlgorithms.HmacSha512,
