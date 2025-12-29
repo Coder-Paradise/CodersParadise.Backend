@@ -55,12 +55,9 @@ namespace CodersParadise.Api.Controllers
                 };
 
                 var result = await _authLogic.Login(userLoginRequest);
-                var roles = new int[] { 2001, 1984, 5150 };
-
                 SetTokensInsideCookie(result.AccessToken, result.RefreshToken, HttpContext);
 
-                //return Ok(new LoginResponse() { AccessToken = result.AccessToken, RefreshToken = result.RefreshToken, TokenExpiry = result.AccessTokenExpiry, Roles = roles  });
-                return Ok(new LoginResponse() { AccessToken = result.AccessToken, Roles = roles });
+                return Ok(new LoginResponse() { AccessToken = result.AccessToken });
             }
             catch(UnauthorizedAccessException e)
             {
@@ -107,7 +104,6 @@ namespace CodersParadise.Api.Controllers
 
         [HttpGet]
         [Route("refresh")]
-        //public async Task<IActionResult> RefreshToken([FromBody] ApiModels.RefreshTokenRequest refreshRequest)
         public async Task<IActionResult> RefreshToken()
         {
             try
@@ -122,10 +118,9 @@ namespace CodersParadise.Api.Controllers
                 };
 
                 var result = await _authLogic.RefreshToken(refreshTokenRequest);
-                var roles = new int[] { 2001, 1984, 5150 };
                 SetTokensInsideCookie(result.AccessToken, result.RefreshToken, HttpContext);
 
-                return Ok(new LoginResponse() { AccessToken = result.AccessToken, Roles = roles });
+                return Ok(new LoginResponse() { AccessToken = result.AccessToken });
             }
             catch (Exception e)
             {
